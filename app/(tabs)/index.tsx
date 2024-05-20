@@ -1,11 +1,10 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
+import { Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, ScrollView, View } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { useState } from 'react';
 
 export default function HomeScreen() {
+  const [newTask, setNewTask] = useState('');
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -15,50 +14,65 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Adicione uma nova tarefa</Text>
+        <View style={styles.inputContainer}>
+          {/* a fução setNewTask será chamada sempre que o valor do input for alterado */}
+          <TextInput style={styles.input} placeholder='Qual será a nova tarefa?' onChangeText={(text) => setNewTask(text)} value={newTask} placeholderTextColor={'#b5b5b5'} />
+          <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+            <Text style={styles.buttonText}>Adicionar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView>
+          <View style={styles.task}>
+            <Text style={[styles.textTask,  styles.completed]}>Estudar React</Text>
+            <TouchableOpacity style={{"paddingRight": 10}}>
+              <Text>Concluir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Text>Excluir</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  inputContainer:{
+    flexDirection: 'row',
+    marginBottom: 20,
+    paddingTop: 20,
+  },
+  button:{
+    backgroundColor: '#007bff',
+    padding: 10,
+    justifyContent: 'center',
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 20,
+    textAlign: 'center',
   },
   reactLogo: {
     height: 178,
@@ -67,4 +81,26 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
   },
+  task: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  textTask:{
+    flex: 1,
+    fontSize: 14,
+  },
+  completed:{
+    textDecorationLine: 'line-through',
+    color: '#999',
+  }
 });

@@ -1,9 +1,54 @@
 import { Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, ScrollView, View } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../servises/supabase';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export default function HomeScreen() {
   const [newTask, setNewTask] = useState('');
+  const [tasks, setTasks] = useState<String[]>([]);
+
+
+  const fetchTasks = async () => {
+    const { data, error } = await supabase.from("tasks").select("*");
+    if (error) {
+      console.log(error);
+
+    } else {
+      setTasks(data);
+    }
+  }
+  const handleAddTask = async (task: string) => {
+    const { data, error } = await supabase.from("tasks").insert({ task, completed: false });
+
+    if(error){
+      console.log(error);
+    } else {
+     await fetchTasks();
+    }
+  }
+
+  const deleteTask = async (id: string) => {
+    const { error } = await supabase.from("tasks").delete().match({ id });
+    if(error){
+      console.log(error);
+    } else {
+      await fetchTasks();
+    }
+  }
+
+  const updateTask = async (id: string) => {
+    const { error } = await supabase.from("tasks").update({ completed: true }).match({ id });
+    if(error){
+      console.log(error);
+    } else {
+      await fetchTasks();
+    }
+  }
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   return (
     <ParallaxScrollView
@@ -19,21 +64,24 @@ export default function HomeScreen() {
         <View style={styles.inputContainer}>
           {/* a fução setNewTask será chamada sempre que o valor do input for alterado */}
           <TextInput style={styles.input} placeholder='Qual será a nova tarefa?' onChangeText={(text) => setNewTask(text)} value={newTask} placeholderTextColor={'#b5b5b5'} />
-          <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.button} activeOpacity={0.7} onPress={() => handleAddTask(newTask)}>
             <Text style={styles.buttonText}>Adicionar</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView>
-          <View style={styles.task}>
-            <Text style={[styles.textTask,  styles.completed]}>Estudar React</Text>
-            <TouchableOpacity style={{"paddingRight": 10}}>
-              <Text>Concluir</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text>Excluir</Text>
-            </TouchableOpacity>
-          </View>
+
+          {tasks.map((task) => (
+            <View style={styles.task} key={task.id}>
+              <Text style={[styles.textTask, task.completed && styles.completed]}>{task.task}</Text>
+              <TouchableOpacity style={{ paddingRight: 10 }} onPress={() => updateTask(task.id)}>
+                <Text>Concluir</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteTask(task.id)}>
+                <Text>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
         </ScrollView>
       </View>
 
@@ -45,12 +93,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  inputContainer:{
+  inputContainer: {
     flexDirection: 'row',
     marginBottom: 20,
     paddingTop: 20,
   },
-  button:{
+  button: {
     backgroundColor: '#007bff',
     padding: 10,
     justifyContent: 'center',
@@ -68,6 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     fontSize: 16,
+    color: '#ffff',
   },
   title: {
     color: '#fff',
@@ -95,11 +144,11 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  textTask:{
+  textTask: {
     flex: 1,
     fontSize: 14,
   },
-  completed:{
+  completed: {
     textDecorationLine: 'line-through',
     color: '#999',
   }
